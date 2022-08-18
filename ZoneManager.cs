@@ -74,7 +74,11 @@ namespace Oxide.Plugins
 
         private void OnTerrainInitialized() => InitializeZones();
 
-        private void OnPlayerConnected(BasePlayer player) => updateBehaviour.QueueUpdate(player);
+        private void OnPlayerConnected(BasePlayer player)
+        {
+            if (player == null) return;
+            updateBehaviour?.QueueUpdate(player);
+        } 
 
         private void OnEntityKill(BaseEntity baseEntity)
         {
@@ -95,20 +99,24 @@ namespace Oxide.Plugins
 
         private void Unload()
         {
+            WipeData();
+            Instance = null;
+        }
+        #endregion
+
+        private void WipeData()
+        {
             if (updateBehaviour != null)
                 DestroyUpdateBehaviour();
 
-            foreach (BasePlayer player in BasePlayer.activePlayerList)
-                CuiHelper.DestroyUi(player, ZMUI);
+            foreach (BasePlayer playerID in BasePlayer.activePlayerList)
+                CuiHelper.DestroyUi(playerID, ZMUI);
 
             foreach (KeyValuePair<string, Zone> kvp in zones)
                 UnityEngine.Object.Destroy(kvp.Value.gameObject);
 
             zones.Clear();
-
-            Instance = null;
         }
-        #endregion
 
         #region UpdateQueue  
         private UpdateBehaviour updateBehaviour;
@@ -756,7 +764,7 @@ namespace Oxide.Plugins
         private void OnPlayerSleepEnd(BasePlayer player)
         {
             if (player == null) return;
-            updateBehaviour.QueueUpdate(player);
+            updateBehaviour?.QueueUpdate(player);
         }
 
         private void KillSleepingPlayer(BasePlayer player)
@@ -2715,16 +2723,7 @@ namespace Oxide.Plugins
 
             storedData.definitions.Clear();
 
-            if (updateBehaviour != null)
-                DestroyUpdateBehaviour();
-
-            foreach (BasePlayer playerID in BasePlayer.activePlayerList)
-                CuiHelper.DestroyUi(playerID, ZMUI);
-
-            foreach (KeyValuePair<string, Zone> kvp in zones)
-                UnityEngine.Object.Destroy(kvp.Value.gameObject);
-
-            zones.Clear();
+            WipeData();
             SaveData();
 
             SendMessage(player, "Wiped zone data");
