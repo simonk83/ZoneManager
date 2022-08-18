@@ -753,7 +753,11 @@ namespace Oxide.Plugins
             });
         }
 
-        private void OnPlayerSleepEnd(BasePlayer player) => updateBehaviour.QueueUpdate(player);
+        private void OnPlayerSleepEnd(BasePlayer player)
+        {
+            if (player == null) return;
+            updateBehaviour.QueueUpdate(player);
+        }
 
         private void KillSleepingPlayer(BasePlayer player)
         {
