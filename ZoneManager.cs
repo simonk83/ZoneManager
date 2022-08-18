@@ -58,7 +58,6 @@ namespace Oxide.Plugins
             Instance = this;
 
             lang.RegisterMessages(Messages, this);
-            
             permission.RegisterPermission(PERMISSION_ZONE, this);
 
             foreach (object flag in Enum.GetValues(typeof(ZoneFlags)))
@@ -96,7 +95,8 @@ namespace Oxide.Plugins
 
         private void Unload()
         {
-            DestroyUpdateBehaviour();
+            if (updateBehaviour != null)
+                DestroyUpdateBehaviour();
 
             foreach (BasePlayer player in BasePlayer.activePlayerList)
                 CuiHelper.DestroyUi(player, ZMUI);
@@ -120,7 +120,6 @@ namespace Oxide.Plugins
             foreach (BasePlayer player in BasePlayer.activePlayerList)
                 updateBehaviour.QueueUpdate(player);
         }
-
         private void DestroyUpdateBehaviour() => UnityEngine.Object.Destroy(updateBehaviour?.gameObject);
 
         // Queue and check players for new zones and that they are still in old zones. Previously any plugin that put a player to sleep and teleports them out of a zone
@@ -388,8 +387,8 @@ namespace Oxide.Plugins
 
                         return true;
                     }
-                    else if (HasPlayerFlag(attacker, ZoneFlags.PvpGod, false) && !IsNpc(attacker))                    
-                        return true;                    
+                    else if (HasPlayerFlag(attacker, ZoneFlags.PvpGod, false) && !IsNpc(attacker))
+                        return true;
                 }
                 else if (HasPlayerFlag(victim, ZoneFlags.PveGod, false) && !IsNpc(victim))
                     return true;
@@ -1163,7 +1162,7 @@ namespace Oxide.Plugins
 
             #region Triggers
             private void InitializeRadiation()
-            {                
+            {
                 if (definition.Radiation > 0)
                 {
                     if (radiation == null)
@@ -1220,7 +1219,7 @@ namespace Oxide.Plugins
                         Destroy(safeZone);
                 }
             }
-                        
+
             private void AddToTrigger(TriggerBase triggerBase, BasePlayer player)
             {
                 if (!triggerBase || !player)
@@ -1283,7 +1282,7 @@ namespace Oxide.Plugins
 
             private void RemoveAllPlayers()
             {
-                for (int i = 0; i < players.Count; i++)                    
+                for (int i = 0; i < players.Count; i++)
                 {
                     BasePlayer player = players[i];
 
@@ -1890,8 +1889,8 @@ namespace Oxide.Plugins
                 return false;
 
             if (zone.definition.Size != Vector3.zero)
-                return IsInsideBounds(zone, position); 
-            else return Vector3.Distance(position, zone.transform.position) <= zone.definition.Radius;            
+                return IsInsideBounds(zone, position);
+            else return Vector3.Distance(position, zone.transform.position) <= zone.definition.Radius;
         }
 
         private List<BasePlayer> GetPlayersInZone(string zoneID)
@@ -2708,8 +2707,21 @@ namespace Oxide.Plugins
             }
 
             storedData.definitions.Clear();
+
+            if (updateBehaviour != null)
+                DestroyUpdateBehaviour();
+
+            foreach (BasePlayer playerID in BasePlayer.activePlayerList)
+                CuiHelper.DestroyUi(playerID, ZMUI);
+
+            foreach (KeyValuePair<string, Zone> kvp in zones)
+            {
+                UnityEngine.Object.Destroy(kvp.Value.gameObject);
+            }
+
+            zones.Clear();
             SaveData();
-            Unload();
+
             SendMessage(player, "Wiped zone data");
         }
 
