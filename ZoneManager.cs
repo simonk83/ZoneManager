@@ -1737,6 +1737,9 @@ namespace Oxide.Plugins
                 else SendMessage(player, zone.definition.LeaveMessage, player.displayName);
             }
 
+            if (player.HasPlayerFlag(BasePlayer.PlayerFlags.SafeZone) && !player.InSafeZone())
+                player.SetPlayerFlag(BasePlayer.PlayerFlags.SafeZone, false);
+
             Interface.CallHook("OnExitZone", zone.definition.Id, player);
         }
 
