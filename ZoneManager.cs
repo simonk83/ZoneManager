@@ -99,12 +99,12 @@ namespace Oxide.Plugins
 
         private void Unload()
         {
-            WipeData();
+            DestroyZones();
             Instance = null;
         }
         #endregion
 
-        private void WipeData()
+        private void DestroyZones()
         {
             if (updateBehaviour != null)
                 DestroyUpdateBehaviour();
@@ -2723,7 +2723,7 @@ namespace Oxide.Plugins
 
             storedData.definitions.Clear();
 
-            WipeData();
+            DestroyZones();
             SaveData();
 
             SendMessage(player, "Wiped zone data");
