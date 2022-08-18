@@ -2718,9 +2718,7 @@ namespace Oxide.Plugins
                 CuiHelper.DestroyUi(playerID, ZMUI);
 
             foreach (KeyValuePair<string, Zone> kvp in zones)
-            {
                 UnityEngine.Object.Destroy(kvp.Value.gameObject);
-            }
 
             zones.Clear();
             SaveData();
